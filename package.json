@@ -1,0 +1,52 @@
+{
+  "name": "meatscraper",
+  "version": "1.0.0",
+  "description": "Extract text content and primary image from webpages using advanced scraping techniques",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "start": "node dist/cli.js",
+    "start:file": "node dist/cli.js",
+    "start:serve": "node dist/cli.js serve"
+  },
+  "keywords": [
+    "web-scraping",
+    "content-extraction",
+    "metadata",
+    "readability",
+    "sanitization"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "@types/express": "^5.0.6",
+    "dompurify": "^3.2.4",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "html-to-text": "^9.0.0",
+    "jsdom": "^24.0.0",
+    "metascraper": "^5.49.5",
+    "metascraper-amazon": "^5.49.5",
+    "metascraper-author": "^5.49.5",
+    "metascraper-date": "^5.49.5",
+    "metascraper-description": "^5.49.5",
+    "metascraper-image": "^5.49.5",
+    "metascraper-logo-favicon": "^5.49.5",
+    "metascraper-publisher": "^5.49.5",
+    "metascraper-title": "^5.49.5",
+    "metascraper-url": "^5.49.5",
+    "metascraper-x": "^5.49.5",
+    "metascraper-youtube": "^5.49.5"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@types/html-to-text": "^9.0.4",
+    "@types/jsdom": "^27.0.0",
+    "@types/node": "^20.19.30",
+    "typescript": "^5.3.3"
+  }
+}
