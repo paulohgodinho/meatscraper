@@ -10,23 +10,35 @@ import {
   formatErrorResponse,
   formatAsJson,
 } from "../utils/formatters";
+import { validateUrl } from "../utils/validate-url";
 
 /**
  * Process an HTML file from disk
  * @param filePath - Path to HTML file
- * @param options - meatscraper options
+ * @param url - REQUIRED: Base URL where the HTML content came from (must be http:// or https://)
+ * @param options - Additional meatscraper options
  * @returns JSON string with extraction result
  */
 export async function processFileMode(
   filePath: string,
-  options?: MeatExtractorOptions
+  url: string,
+  options?: Omit<MeatExtractorOptions, 'url'>
 ): Promise<string> {
   try {
     // Validate file path is provided
     if (!filePath) {
       const errorResponse = formatErrorResponse(
-        "No file path provided. Usage: npm run start <file-path>"
+        "No file path provided. Usage: meatscraper <file-path> <url>"
       );
+      return formatAsJson(errorResponse);
+    }
+
+    // Validate URL is provided and properly formatted
+    try {
+      validateUrl(url, "File mode");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorResponse = formatErrorResponse(errorMessage, "INVALID_URL");
       return formatAsJson(errorResponse);
     }
 
@@ -62,8 +74,8 @@ export async function processFileMode(
      console.error(`⚙️  Processing HTML with meatscraper...`);
     const startTime = Date.now();
     const result = await meatExtractor(htmlContent, {
+      url: url,
       ...options,
-      url: options?.url || `file://${absolutePath}`,
     });
     const duration = Date.now() - startTime;
 
@@ -72,7 +84,7 @@ export async function processFileMode(
     );
 
     // Format and return success response
-    const successResponse = formatSuccessResponse(result);
+    const successResponse = formatSuccessResponse(result, url);
     return formatAsJson(successResponse);
   } catch (error) {
     const errorMessage =

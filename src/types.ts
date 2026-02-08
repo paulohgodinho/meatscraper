@@ -52,8 +52,7 @@ export interface DebugInfo {
 export interface MeatExtractorResult {
   // Main outputs
   content: string; // Plain text (NO HTML tags)
-  image: string | null; // Primary image URL
-  metadata: MetadataResult; // Full metadata object
+  metadata: MetadataResult; // Full metadata object (metadata.image contains best image with fallbacks)
 
   // Optional debug pipeline output
   debug?: DebugInfo;
@@ -64,5 +63,5 @@ export interface MeatExtractorResult {
  */
 export interface MeatExtractorOptions {
   debug?: boolean; // Enable step-by-step debug output
-  url?: string; // Optional: helps metascraper with canonicalization
+  url: string; // REQUIRED: Base URL for resolving relative paths and metadata extraction (must be http:// or https://)
 }

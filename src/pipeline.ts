@@ -10,10 +10,7 @@ import { step1ExtractMetadata } from "./steps/step1-metadata";
 import { step2ExtractReadableContent } from "./steps/step2-readable";
 import { step3SanitizeHtml } from "./steps/step3-sanitize";
 import { step4ConvertToPlainText } from "./steps/step4-plaintext";
-import {
-  step5SelectImage,
-  ImageSelectionResult,
-} from "./steps/step5-image";
+import { step5EnhanceMetadataImage } from "./steps/step5-image";
 
 /**
  * Execute the complete extraction pipeline
@@ -26,20 +23,20 @@ import {
  * 5. Select the best primary image from metadata
  * 
  * @param htmlContent - Raw HTML string
- * @param options - Configuration options
+ * @param options - Configuration options (url is REQUIRED)
  * @returns Complete extraction result
  */
 export async function executePipeline(
   htmlContent: string,
-  options?: MeatExtractorOptions
+  options: MeatExtractorOptions
 ): Promise<MeatExtractorResult> {
   // ===== STEP 1: Extract Metadata =====
-  const metadata = await step1ExtractMetadata(htmlContent, options?.url);
+  const metadata = await step1ExtractMetadata(htmlContent, options.url);
 
   // ===== STEP 2: Extract Readable Content =====
   const readableContent = step2ExtractReadableContent(
     htmlContent,
-    options?.url
+    options.url
   );
 
   // ===== STEP 3: Sanitize HTML =====
@@ -48,13 +45,13 @@ export async function executePipeline(
   // ===== STEP 4: Convert to Plain Text =====
   const plaintext = step4ConvertToPlainText(sanitizedContent);
 
-  // ===== STEP 5: Select Image =====
-  const imageSelection = step5SelectImage(metadata, htmlContent, options?.url);
+  // ===== STEP 5: Enhance Metadata Image with Fallbacks =====
+  step5EnhanceMetadataImage(metadata, htmlContent, options.url);
+  // Now metadata.image contains the best available image (with fallbacks applied)
 
   // ===== Build Result =====
   const result: MeatExtractorResult = {
     content: plaintext,
-    image: imageSelection.selected,
     metadata: metadata,
   };
 
@@ -65,7 +62,11 @@ export async function executePipeline(
       step2_readableContent: readableContent || "",
       step3_sanitizedContent: sanitizedContent || "",
       step4_plaintext: plaintext,
-      step5_imageSelection: imageSelection,
+      step5_imageSelection: {
+        extracted: metadata.image || null,
+        selected: metadata.image || null,
+        reason: "metadata.image enhanced with fallback logic",
+      },
     };
 
     result.debug = debug;

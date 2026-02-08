@@ -19,22 +19,27 @@ async function example() {
   console.log("=== meatscraper Example ===\n");
 
   try {
-    // Basic usage
-    console.log("1. Basic Usage:");
-    const result = await meatExtractor(exampleHtml);
+    // Basic usage (URL is now required)
+    console.log("1. Basic Usage (URL is required):");
+    const result = await meatExtractor(exampleHtml, {
+      url: "https://example.com/article",
+    });
     console.log("Title:", result.metadata.title);
     console.log("Description:", result.metadata.description);
     console.log("Author:", result.metadata.author);
-    console.log("Image:", result.image);
+    console.log("Image:", result.metadata.image);
+    console.log("Logo:", result.metadata.logo);
     console.log("Content:", result.content.substring(0, 100) + "...");
     console.log();
 
-    // With URL context
-    console.log("2. With URL Context:");
-    const urlResult = await meatExtractor(exampleHtml, {
+    // With debug mode
+    console.log("2. With Debug Mode:");
+    const debugResult = await meatExtractor(exampleHtml, {
       url: "https://example.com/article",
+      debug: true,
     });
-    console.log("Canonical URL:", urlResult.metadata.url);
+    console.log("Canonical URL:", debugResult.metadata.url);
+    console.log("Debug info available:", !!debugResult.debug);
     console.log();
 
     // Display full metadata

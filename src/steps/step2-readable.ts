@@ -13,12 +13,12 @@ import { Readability } from "@mozilla/readability";
  * Extract readable content from HTML
  * 
  * @param htmlContent - Raw HTML string
- * @param url - Optional URL for context
+ * @param url - Base URL for context (REQUIRED)
  * @returns HTML string of main article content, or null if extraction fails
  */
 export function step2ExtractReadableContent(
   htmlContent: string,
-  url?: string
+  url: string
 ): string | null {
   try {
     // Create a virtual console to suppress warnings
@@ -26,7 +26,7 @@ export function step2ExtractReadableContent(
 
     // Parse HTML into DOM
     const dom = new JSDOM(htmlContent, {
-      url: url || "about:blank",
+      url: url,
       virtualConsole,
     });
 

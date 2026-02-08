@@ -1,19 +1,18 @@
 /**
- * Step 5: Select the primary image
+ * Step 5: Enhance metadata.image with fallback logic
  * 
- * Extracts the best primary image URL from metadata.
- * Uses metascraperImage result as primary, falls back to logo if needed.
+ * Ensures metadata.image contains the best available image by applying fallbacks:
+ * 1. If metadata.image exists and is valid, keep it
+ * 2. Fallback to metadata.logo (favicon from metascraper-logo-favicon)
+ * 3. Fallback to parsing HTML for favicon <link> tags
+ * 4. If nothing found, metadata.image remains null
+ * 
+ * Modifies metadata object in place.
  */
 
 import { MetadataResult } from "../types";
 import { JSDOM } from "jsdom";
 import { URL } from "url";
-
-export interface ImageSelectionResult {
-  extracted: string | null;
-  selected: string | null;
-  reason: string;
-}
 
 /**
  * Extract favicon URL from HTML <link> tags
@@ -65,73 +64,41 @@ function extractFaviconFromHtml(htmlContent: string, baseUrl: string): string | 
 }
 
 /**
- * Select the best primary image from metadata
+ * Enhance metadata.image with fallback logic
  * 
- * @param metadata - Metadata object from step 1
+ * @param metadata - Metadata object from step 1 (MODIFIED IN PLACE)
  * @param htmlContent - Raw HTML content for favicon extraction fallback
- * @param url - Base URL for resolving relative favicon paths
- * @returns Object with extracted image, selected image, and reason
+ * @param url - Base URL for resolving relative favicon paths (REQUIRED)
  */
-export function step5SelectImage(
+export function step5EnhanceMetadataImage(
   metadata: MetadataResult,
-  htmlContent?: string,
-  url?: string
-): ImageSelectionResult {
-  // Helper to extract first string from image (handles array or string)
-  const getImageUrl = (img: any): string | null => {
-    if (!img) return null;
-    if (typeof img === "string") return img;
-    if (Array.isArray(img) && img.length > 0) {
-      return typeof img[0] === "string" ? img[0] : null;
-    }
-    return null;
+  htmlContent: string,
+  url: string
+): void {
+  // Helper to check if an image URL is valid (not null, not empty, not data URI)
+  const isValidImage = (img: any): boolean => {
+    return img && typeof img === 'string' && !img.startsWith('data:');
   };
 
-  // Primary source: metascraperImage result
-  const imageUrl = getImageUrl(metadata.image);
-  if (imageUrl) {
-    // Don't use data URIs - they're typically very large and not useful for external reference
-    if (!imageUrl.startsWith("data:")) {
-      return {
-        extracted: imageUrl,
-        selected: imageUrl,
-        reason: "Primary image from metascraper",
-      };
-    }
+  // If we already have a valid primary image, we're done
+  if (isValidImage(metadata.image)) {
+    return;
   }
 
-  // Fallback 1: Logo/favicon
-  const logoUrl = getImageUrl(metadata.logo);
-  if (logoUrl && !logoUrl.startsWith("data:")) {
-    return {
-      extracted: imageUrl,
-      selected: logoUrl,
-      reason: "Fallback to logo/favicon",
-    };
+  // Fallback 1: Use logo/favicon from metascraper-logo-favicon plugin
+  if (isValidImage(metadata.logo)) {
+    metadata.image = metadata.logo;
+    return;
   }
 
   // Fallback 2: Search HTML for favicon <link> tags
-  if (htmlContent) {
-    // Prefer metadata.url (from og:url) over passed url parameter
-    const baseUrl = metadata.url || url;
-    
-    if (baseUrl) {
-      const htmlFavicon = extractFaviconFromHtml(htmlContent, baseUrl);
-      if (htmlFavicon) {
-        return {
-          extracted: imageUrl,
-          selected: htmlFavicon,
-          reason: "Favicon extracted from HTML <link> tags",
-        };
-      }
-    }
+  const baseUrl = metadata.url || url;
+  const htmlFavicon = extractFaviconFromHtml(htmlContent, baseUrl);
+  if (htmlFavicon) {
+    metadata.image = htmlFavicon;
+    return;
   }
 
-  // No suitable image found
-  return {
-    extracted: imageUrl,
-    selected: null,
-    reason: "No suitable image found",
-  };
+  // No suitable image found - metadata.image remains null
 }
 

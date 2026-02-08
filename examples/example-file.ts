@@ -39,7 +39,8 @@ async function processHtmlFile() {
     console.log(`Author:       ${result.metadata.author || "Not found"}`);
     console.log(`Published:    ${result.metadata.datePublished || "Not found"}`);
     console.log(`Modified:     ${result.metadata.dateModified || "Not found"}`);
-    console.log(`Image:        ${result.image || "Not found"}`);
+    console.log(`Image:        ${result.metadata.image || "Not found"}`);
+    console.log(`Logo:         ${result.metadata.logo || "Not found"}`);
     console.log(`URL:          ${result.metadata.url}`);
     console.log();
 

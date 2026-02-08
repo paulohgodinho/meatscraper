@@ -10,10 +10,12 @@ import {
   formatSuccessResponse,
   formatErrorResponse,
 } from "../utils/formatters";
+import { validateUrl } from "../utils/validate-url";
 
 interface ExtractRequest extends Request {
   body: {
     html?: string;
+    url?: string;
   };
 }
 
@@ -64,7 +66,7 @@ export function startHttpServer(port: number = 8676): Express {
   // Main extraction endpoint
   app.post("/extract", async (req: ExtractRequest, res: Response) => {
     try {
-      const { html } = req.body;
+      const { html, url } = req.body;
 
       // Validate html field exists
       if (!html) {
@@ -96,9 +98,42 @@ export function startHttpServer(port: number = 8676): Express {
         return;
       }
 
+      // Validate url field exists
+      if (!url) {
+        const errorResponse = formatErrorResponse(
+          "Missing required field: 'url'",
+          "MISSING_URL_FIELD"
+        );
+        res.status(400).json(errorResponse);
+        return;
+      }
+
+      // Validate url is a string
+      if (typeof url !== "string") {
+        const errorResponse = formatErrorResponse(
+          "Field 'url' must be a string",
+          "INVALID_URL_TYPE"
+        );
+        res.status(400).json(errorResponse);
+        return;
+      }
+
+      // Validate url format
+      try {
+        validateUrl(url, "HTTP request");
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorResponse = formatErrorResponse(
+          errorMessage,
+          "INVALID_URL_FORMAT"
+        );
+        res.status(400).json(errorResponse);
+        return;
+      }
+
       // Process with meatExtractor
-      const result = await meatExtractor(html);
-      const successResponse = formatSuccessResponse(result);
+      const result = await meatExtractor(html, { url });
+      const successResponse = formatSuccessResponse(result, url);
       res.status(200).json(successResponse);
     } catch (error) {
       const errorMessage =
@@ -141,7 +176,7 @@ export function startHttpServer(port: number = 8676): Express {
     console.log(`\n📝 Request format:`);
     console.log(`   POST /extract`);
     console.log(`   Content-Type: application/json`);
-    console.log(`   Body: { "html": "<html>...</html>" }\n`);
+    console.log(`   Body: { "html": "<html>...</html>", "url": "https://example.com/page" }\n`);
 
     console.log(`📊 Server is listening for requests...\n`);
   });

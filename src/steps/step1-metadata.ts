@@ -10,7 +10,7 @@ import { extractMetadata } from "../metascraper-setup";
 
 export async function step1ExtractMetadata(
   htmlContent: string,
-  url?: string
+  url: string
 ): Promise<MetadataResult> {
   const metadata = await extractMetadata(htmlContent, url);
 

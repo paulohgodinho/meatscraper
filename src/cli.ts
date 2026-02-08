@@ -4,8 +4,8 @@
  * CLI entry point for meatscraper
  *
  * Usage:
- *   npm run start <file-path>     # File mode: extract from HTML file
- *   npm run start serve           # Server mode: start HTTP server on port 8676
+ *   meatscraper <file-path>     # File mode: extract from HTML file
+ *   meatscraper serve           # Server mode: start HTTP server on port 8676
  */
 
 import { processFileMode } from "./modes/file-mode";
@@ -19,12 +19,12 @@ async function main() {
   if (!command) {
     console.error("❌ No command provided");
     console.error("\nUsage:");
-    console.error("  npm run start <file-path>     Extract content from an HTML file");
-    console.error("  npm run start serve           Start HTTP server on port 8676");
+    console.error("  meatscraper <file-path> <url>     Extract content from an HTML file");
+    console.error("  meatscraper serve                 Start HTTP server on port 8676");
     console.error("\nExamples:");
-    console.error("  npm run start ./example.html");
-    console.error("  npm run start /path/to/file.html");
-    console.error("  npm run start serve");
+    console.error("  meatscraper ./example.html https://example.com/page");
+    console.error("  meatscraper /path/to/file.html https://site.com/article");
+    console.error("  meatscraper serve");
     process.exit(1);
   }
 
@@ -47,9 +47,24 @@ async function main() {
     return;
   }
 
-  // File mode
+  // File mode - requires both file path and URL
   try {
-    const result = await processFileMode(command);
+    const filePath = args[0];
+    const url = args[1];
+    
+    // Check if URL is provided
+    if (!url) {
+      console.error("❌ URL parameter is required");
+      console.error("\nUsage:");
+      console.error("  meatscraper <file-path> <url>");
+      console.error("\nExample:");
+      console.error("  meatscraper ./article.html https://example.com/article");
+      console.error("\nThe URL should be the original web address where the HTML came from.");
+      console.error("This is required for proper image and relative link resolution.");
+      process.exit(1);
+    }
+    
+    const result = await processFileMode(filePath, url);
     // Output to stdout for piping/redirection
     console.log(result);
     process.exit(0);

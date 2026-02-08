@@ -65,18 +65,18 @@ export function createMetascraperParser() {
  * Extract metadata from HTML content
  * 
  * @param htmlContent - The raw HTML string to extract metadata from
- * @param url - Optional URL for context (helps canonicalization)
+ * @param url - Base URL for context (REQUIRED for proper relative path resolution)
  * @returns Promise resolving to metadata object
  */
 export async function extractMetadata(
   htmlContent: string,
-  url?: string
+  url: string
 ): Promise<Record<string, any>> {
   const parser = createMetascraperParser();
 
   const meta = await parser({
     html: htmlContent,
-    url: url || "about:blank",
+    url: url,
     // Don't validate URL - we're processing pre-fetched HTML
     validateUrl: false,
   });

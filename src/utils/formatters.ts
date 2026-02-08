@@ -9,9 +9,9 @@ import { MeatExtractorResult } from "../index";
  */
 export interface SuccessResponse {
   success: true;
+  url: string;
   data: {
     content: string;
-    image: string | null;
     metadata: any;
   };
 }
@@ -29,13 +29,19 @@ export type ApiResponse = SuccessResponse | ErrorResponse;
 
 /**
  * Format a successful meatscraper result for API/file responses
+ * 
+ * @param result - The extraction result from meatExtractor
+ * @param url - The URL that was crawled/processed
  */
-export function formatSuccessResponse(result: MeatExtractorResult): SuccessResponse {
+export function formatSuccessResponse(
+  result: MeatExtractorResult,
+  url: string
+): SuccessResponse {
   return {
     success: true,
+    url: url,
     data: {
       content: result.content,
-      image: result.image,
       metadata: result.metadata,
     },
   };

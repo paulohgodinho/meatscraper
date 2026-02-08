@@ -1,9 +1,23 @@
 # meatscraper
+
 Extract content from webpages! Perfect for bookmarking tools and AI ;)
 
 Clean text content, metadata, and primary images from any webpage using [Metascraper](https://github.com/microlinkhq/metascraper), [Readability](https://github.com/mozilla/readability), [DOMPurify](https://github.com/cure53/DOMPurify) and custom logic.
 
 *Disclaimer: This project was vibe coded.*
+
+## Installation
+
+```bash
+# Install as a library
+npm install meatscraper
+
+# Or install globally for CLI access
+npm install -g meatscraper
+
+# Or use directly with npx (no install needed)
+npx meatscraper serve
+```
 
 ## Inspiration
 This project is based on [Karakeep](https://github.com/karakeep/karakeep). They have done an amazing job building a content extraction pipeline. I wanted to use that functionality in other projects, so I pulled it from them and the created this library/CLI/server around it.
@@ -25,11 +39,13 @@ This project is based on [Karakeep](https://github.com/karakeep/karakeep). They 
 ```json
 {
   "success": true,
+  "url": "https://example.com/article",
   "data": {
     "content": "Hello World\nThis is the actual content you want to keep.",
-    "image": null,
     "metadata": {
-      "title": "My Article"
+      "title": "My Article",
+      "image": null,
+      "logo": null
     }
   }
 }
@@ -42,24 +58,42 @@ This project is based on [Karakeep](https://github.com/karakeep/karakeep). They 
 ```typescript
 import { meatExtractor } from 'meatscraper';
 
-const result = await meatExtractor(htmlString);
-console.log(result.content);    // Clean text only
-console.log(result.image);      // Primary image URL
-console.log(result.metadata);   // {title, author, date, ...}
+// URL parameter is REQUIRED for proper image and link resolution
+const result = await meatExtractor(htmlString, {
+  url: 'https://example.com/article'
+});
+
+console.log(result.content);         // Clean text only
+console.log(result.metadata.image);  // Primary image URL (with fallback to logo/favicon)
+console.log(result.metadata);        // {title, author, date, ...}
 ```
 
 ### CLI - Process Local File
 
 ```bash
-npm run start ./article.html
+# URL parameter is REQUIRED
+# Syntax: meatscraper <file-path> <url>
+
+# After global install
+meatscraper ./article.html https://example.com/article
+
+# Or with npx (no install needed)
+npx meatscraper ./article.html https://example.com/article
 ```
 
 Output is printed as JSON to stdout.
 
+**Why is URL required?**
+The URL is needed to properly resolve relative image paths and links in the HTML content. For example, if your HTML has `<img src="/logo.png">`, the URL helps resolve it to the full path like `https://example.com/logo.png`.
+
 ### CLI - Start HTTP Server
 
 ```bash
-npm run start serve
+# After global install
+meatscraper serve
+
+# Or with npx
+npx meatscraper serve
 ```
 
 Server runs on port 8676. Send HTML via POST:
@@ -67,11 +101,11 @@ Server runs on port 8676. Send HTML via POST:
 ```bash
 curl -X POST http://localhost:8676/extract \
   -H "Content-Type: application/json" \
-  -d '{"html":"<html>...</html>"}'
+  -d '{"html":"<html>...</html>","url":"https://example.com/page"}'
 ```
 
 Endpoints:
-- `POST /extract` - Extract content from HTML
+- `POST /extract` - Extract content from HTML (requires both `html` and `url` fields)
 - `GET /health` - Health check
 - `GET /stats` - Server statistics
 
@@ -83,8 +117,9 @@ Pull and run the latest published image:
 # Server mode
 docker run -p 8676:8676 ghcr.io/paulohgodinho/meatscraper:main serve
 
-# File mode (requires mounted volume)
-docker run -v $(pwd):/data ghcr.io/paulohgodinho/meatscraper:main /data/article.html
+# File mode (requires mounted volume and URL parameter)
+docker run -v $(pwd):/data ghcr.io/paulohgodinho/meatscraper:main \
+  /data/article.html https://example.com/article
 ```
 
 ## API Response
@@ -94,9 +129,9 @@ Complete response structure:
 ```json
 {
   "success": true,
+  "url": "https://example.com/article",
   "data": {
     "content": "Hello World\nThis is the actual content you want to keep.",
-    "image": "https://example.com/image.jpg",
     "metadata": {
       "title": "My Article",
       "description": "Article description here",
@@ -105,6 +140,7 @@ Complete response structure:
       "datePublished": "2024-01-15T10:30:00Z",
       "dateModified": "2024-01-15T12:00:00Z",
       "url": "https://example.com/article",
+      "image": "https://example.com/image.jpg",
       "logo": "https://example.com/logo.png",
       "youtubeVideoId": null,
       "youtubeChannelName": null,
