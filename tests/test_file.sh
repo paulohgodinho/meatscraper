@@ -8,7 +8,11 @@ PASSED=0
 FAILED=0
 
 echo "Testing file mode with: $TEST_FILE"
+docker build -t $IMAGE_NAME -f "$SCRIPT_DIR/../docker/Dockerfile" "$SCRIPT_DIR/.."
 OUTPUT=$(docker run --rm -v "$TEST_FILE:/input.html" $IMAGE_NAME /input.html 2>&1 | grep -A 10000 "^{")
+
+echo "Output from container:"
+echo "$OUTPUT"
 
 # Check if output is valid JSON
 if echo "$OUTPUT" | jq empty 2>/dev/null; then

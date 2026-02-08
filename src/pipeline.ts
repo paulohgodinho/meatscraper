@@ -49,7 +49,7 @@ export async function executePipeline(
   const plaintext = step4ConvertToPlainText(sanitizedContent);
 
   // ===== STEP 5: Select Image =====
-  const imageSelection = step5SelectImage(metadata);
+  const imageSelection = step5SelectImage(metadata, htmlContent, options?.url);
 
   // ===== Build Result =====
   const result: MeatExtractorResult = {

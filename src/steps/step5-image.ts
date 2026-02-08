@@ -6,6 +6,8 @@
  */
 
 import { MetadataResult } from "../types";
+import { JSDOM } from "jsdom";
+import { URL } from "url";
 
 export interface ImageSelectionResult {
   extracted: string | null;
@@ -14,13 +16,66 @@ export interface ImageSelectionResult {
 }
 
 /**
+ * Extract favicon URL from HTML <link> tags
+ * 
+ * @param htmlContent - Raw HTML string to parse
+ * @param baseUrl - Base URL for resolving relative paths
+ * @returns Favicon URL or null if not found
+ */
+function extractFaviconFromHtml(htmlContent: string, baseUrl: string): string | null {
+  try {
+    const dom = new JSDOM(htmlContent);
+    const document = dom.window.document;
+    
+    // Search for favicon link tags in order of preference
+    const faviconSelectors = [
+      'link[rel="icon"]',
+      'link[rel="shortcut icon"]',
+      'link[rel="apple-touch-icon"]',
+      'link[rel="apple-touch-icon-precomposed"]',
+    ];
+    
+    for (const selector of faviconSelectors) {
+      const linkElement = document.querySelector(selector);
+      if (linkElement) {
+        const href = linkElement.getAttribute('href');
+        if (href) {
+          // Skip data URIs
+          if (href.startsWith('data:')) {
+            continue;
+          }
+          
+          // Resolve relative URLs to absolute
+          try {
+            const resolvedUrl = new URL(href, baseUrl);
+            return resolvedUrl.href;
+          } catch (e) {
+            // Invalid URL, try next
+            continue;
+          }
+        }
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    // HTML parsing failed
+    return null;
+  }
+}
+
+/**
  * Select the best primary image from metadata
  * 
  * @param metadata - Metadata object from step 1
+ * @param htmlContent - Raw HTML content for favicon extraction fallback
+ * @param url - Base URL for resolving relative favicon paths
  * @returns Object with extracted image, selected image, and reason
  */
 export function step5SelectImage(
-  metadata: MetadataResult
+  metadata: MetadataResult,
+  htmlContent?: string,
+  url?: string
 ): ImageSelectionResult {
   // Helper to extract first string from image (handles array or string)
   const getImageUrl = (img: any): string | null => {
@@ -53,6 +108,23 @@ export function step5SelectImage(
       selected: logoUrl,
       reason: "Fallback to logo/favicon",
     };
+  }
+
+  // Fallback 2: Search HTML for favicon <link> tags
+  if (htmlContent) {
+    // Prefer metadata.url (from og:url) over passed url parameter
+    const baseUrl = metadata.url || url;
+    
+    if (baseUrl) {
+      const htmlFavicon = extractFaviconFromHtml(htmlContent, baseUrl);
+      if (htmlFavicon) {
+        return {
+          extracted: imageUrl,
+          selected: htmlFavicon,
+          reason: "Favicon extracted from HTML <link> tags",
+        };
+      }
+    }
   }
 
   // No suitable image found
