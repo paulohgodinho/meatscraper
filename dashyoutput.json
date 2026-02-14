@@ -1,0 +1,54 @@
+{
+   "date": null,
+   "datePublished": null,
+   "dateModified": null,
+   "image": "https://dashy.to/img/dashy.png",
+   "lang": null,
+   "author": null,
+   "title": "Dashy | Dashy",
+   "publisher": "Dashy",
+   "logo": "https://dashy.to/img/favicon.ico",
+   "readableContentHtml": null,
+   "description": "Dashy, the self-hosted dashboard app for your homelab",
+   "url": "https://dashy.to/"
+ }
+
+{
+   "bookmarkId": "ph13g23nwzd966gbf06fo7zr",
+   "bookmarkLinks": {
+     "title": "Dashy | Dashy",
+     "description": "Dashy, the self-hosted dashboard app for your homelab",
+     "imageUrl": "https://dashy.to/img/dashy.png",
+     "favicon": "https://dashy.to/img/favicon.ico",
+     "author": null,
+     "publisher": "Dashy",
+     "datePublished": null,
+     "dateModified": null,
+     "crawledAt": "2026-02-08T04:38:39.111Z",
+     "crawlStatusCode": 200,
+     "htmlContent": null,
+     "contentAssetId": "71bdee39-a3bf-4c23-8242-25525a8d85ff"
+   },
+   "assets": {
+     "screenshot": {
+       "assetId": "595efa11-916b-4be3-8762-9c4569601ca5",
+       "assetType": "linkScreenshot",
+       "contentType": "image/jpeg",
+       "size": 96033,
+       "fileName": "screenshot.jpeg"
+     },
+     "bannerImage": {
+       "assetId": "2bd562ec-4837-47b4-b007-e94e64c86c1c",
+       "assetType": "linkBannerImage",
+       "contentType": "image/png",
+       "size": 143714
+     },
+     "pdf": null,
+     "htmlContent": {
+       "assetId": "71bdee39-a3bf-4c23-8242-25525a8d85ff",
+       "assetType": "linkHtmlContent",
+       "contentType": "text/html",
+       "size": 6035
+     }
+   }
+ }
