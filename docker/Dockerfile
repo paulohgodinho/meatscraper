@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++ cairo-dev jpeg-dev
@@ -23,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Install dumb-init to handle signals properly
 RUN apk add --no-cache dumb-init
